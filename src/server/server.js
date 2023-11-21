@@ -13,20 +13,31 @@ app.use(
 const path = require("path");
 const fs = require("fs");
 
-const template = pug.compileFile("src/SignupTemplate.pug");
-const productPug = pug.compileFile(path.join(__dirname, "Product.pug"));
-const productCSS = fs.readFileSync(path.join(__dirname, "Product.css"), "utf8");
+const signupPug = pug.compileFile("src/templates/SignupTemplate.pug");
+const signupCSS = fs.readFileSync(
+  path.join("src/templates/SignupTemplate.css"),
+  "utf8"
+);
+
+const productPug = pug.compileFile("src/templates/Product.pug");
+const productCSS = fs.readFileSync(
+  path.join("src/templates/Product.css"),
+  "utf8"
+);
 
 app.get("/signup_ssr", (req, res) => {
-  console.log("request recieved");
-  const html = template();
+  const signupHTML = signupPug();
+  const html = `
+    <style>${signupCSS}</style>
+    ${signupHTML}
+  `;
   console.log(html);
   res.send(html);
 });
 
 app.get("/products", (req, res) => {
   // Fetch products data from dummyjson.com
-  console.log("request recieved for dummyjson.com");
+
   axios
     .get("https://dummyjson.com/products?limit=10")
     .then((response) => {
@@ -36,7 +47,7 @@ app.get("/products", (req, res) => {
       const productListHTML = products
         .map((product) => {
           const productHTML = productPug({ product });
-          return `<div class="product">${productHTML}</div>`;
+          return `${productHTML}`;
         })
         .join("");
 
